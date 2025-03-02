@@ -18,7 +18,7 @@ func TestRootHandler(t *testing.T) {
 	router.GET("/", rootHandler)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "This is a silly demo\n", w.Body.String())
+	assert.Equal(t, "This is a demo\n", w.Body.String())
 
 	// Test case 2: Query parameter "fail" is present
 	req, _ = http.NewRequest("GET", "/?fail=true", nil)
@@ -32,7 +32,7 @@ func TestRootHandler(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "<h1>This is a silly demo</h1>\n", w.Body.String())
+	assert.Equal(t, "<h1>This is a demo</h1>\n", w.Body.String())
 
 	// Test case 4: Query parameter "html" and "fail" are present
 	req, _ = http.NewRequest("GET", "/?html=true&fail=true", nil)
@@ -47,7 +47,7 @@ func TestRootHandler(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "This is a silly demo version 1.0\n", w.Body.String())
+	assert.Equal(t, "This is a demo version 1.0\n", w.Body.String())
 	os.Unsetenv("VERSION")
 
 	// Test case 6: Environment variable "MESSAGE" is set
