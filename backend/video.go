@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -8,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-pg/pg/v10"
-
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg/v10"
+	"github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
 )
 
@@ -73,6 +74,30 @@ func getDB(c *gin.Context) *pg.DB {
 func videosGetHandler(ctx *gin.Context) {
 	slog.Debug("Handling request", "URI", ctx.Request.RequestURI)
 	var videos []Video
+	client, err := getRedis()
+	if err != nil {
+		slog.Error("Error getting redis client", "error", err)
+		httpErrorInternalServerError(err, ctx)
+		return
+	}
+	videoCacheKay := "videos"
+	val, err := client.Get(ctx, videoCacheKay).Result()
+	if err == redis.Nil {
+		slog.Warn("key %s does not exist", videoCacheKay)
+	} else if err != nil {
+		slog.Error("Error fetching from Redis", "error", err)
+		httpErrorInternalServerError(err, ctx)
+		return
+	} else {
+		// Deserialize JSON from Redis
+		err = json.Unmarshal([]byte(val), &videos)
+		if err == nil {
+			slog.Warn("Fetched videos from Redis", "count", len(videos))
+			ctx.JSON(http.StatusOK, videos)
+			return
+		}
+		slog.Warn("Failed to unmarshal Redis data", "error", err)
+	}
 	if strings.ToLower(os.Getenv("DB")) == "fs" {
 		var err error
 		videos, err = getVideosFromFile()
@@ -90,6 +115,16 @@ func videosGetHandler(ctx *gin.Context) {
 			httpErrorInternalServerError(err, ctx)
 			return
 		}
+	}
+	videoJSON, err := json.Marshal(videos)
+	if err != nil {
+		slog.Error("Failed to marshal videos to JSON", "error", err)
+		httpErrorInternalServerError(err, ctx)
+		return
+	}
+	err = client.Set(ctx, videoCacheKay, videoJSON, 0).Err()
+	if err != nil {
+		slog.Error(fmt.Sprintf("unable store data in redis - %s", err))
 	}
 	ctx.JSON(http.StatusOK, videos)
 }
@@ -153,4 +188,23 @@ func videoPostHandler(ctx *gin.Context) {
 			return
 		}
 	}
+}
+
+func getRedis() (*redis.Client, error) {
+
+	endpoint := os.Getenv("REDIS_ENDPOINT")
+	if len(endpoint) == 0 {
+		return nil, fmt.Errorf("Environment variable `REDIS_ENDPOINT` is empty")
+	}
+
+	port := os.Getenv("REDIS_PORT")
+	if len(port) == 0 {
+		return nil, fmt.Errorf("Environment variable `REDIS_PORT` is empty")
+	}
+
+	return redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", endpoint, port),
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	}), nil
 }
