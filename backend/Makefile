@@ -5,3 +5,7 @@ exec:
 	docker exec -it app-go sh
 retrieve-data:
 	./dump.sh
+up:
+	docker compose up -d
+down:
+	docker compose down
