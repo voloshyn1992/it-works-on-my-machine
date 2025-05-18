@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   app:
     restart: always
@@ -7,9 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/go/src/
-    image: app-go
     container_name: app-go
     ports:
       - "8080:8080"
