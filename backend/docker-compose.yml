@@ -1,0 +1,61 @@
+version: "3"
+
+services:
+  app:
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/go/src/
+    image: app-go
+    container_name: app-go
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.local
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - app-go-network
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+    networks:
+      - app-go-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    restart: always
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      SCHEMA: ${POSTGRES_SCHEMA}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
+    env_file:
+      - .env.local
+    networks:
+      - app-go-network
+
+networks:
+  app-go-network:
+
+volumes:
+  redis:
+  postgres:
+
