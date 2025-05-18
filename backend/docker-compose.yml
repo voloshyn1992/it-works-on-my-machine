@@ -22,8 +22,6 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis:/data
     networks:
       - app-go-network
 
@@ -31,9 +29,6 @@ services:
     image: postgres:17-alpine
     container_name: postgres
     restart: always
-    volumes:
-      - postgres:/var/lib/postgresql/data
-      - ./db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
     ports:
       - "15432:5432"
     environment:
@@ -41,7 +36,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       SCHEMA: ${POSTGRES_SCHEMA}
-      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
     env_file:
       - .env.local
     networks:
@@ -49,8 +43,4 @@ services:
 
 networks:
   app-go-network:
-
-volumes:
-  redis:
-  postgres:
 
