@@ -1,0 +1,10 @@
+services:
+  app-js:
+    image: volodymyrbjj/app-js
+    restart: always
+    tty: true
+    build:
+      context: .
+    container_name: app-js
+    ports:
+      - "3000:3000"

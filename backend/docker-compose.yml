@@ -1,5 +1,6 @@
 services:
   app:
+    image: volodymyrbjj/app-go
     restart: always
     tty: true
     build:
