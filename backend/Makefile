@@ -3,5 +3,5 @@ build:
 	docker compose up --remove-orphans --force-recreate -d
 exec:
 	docker exec -it app-go sh
-deploy-data:
+retrieve-data:
 	./dump.sh
