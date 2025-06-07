@@ -1,4 +1,6 @@
+DOCKER_COMPOSE=docker compose
+
 up:
-	docker compose up -d
+	$(DOCKER_COMPOSE) up -d
 down:
-	docker compose down
+	$(DOCKER_COMPOSE) down
