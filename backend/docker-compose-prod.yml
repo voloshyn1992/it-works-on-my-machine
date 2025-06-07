@@ -39,7 +39,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       SCHEMA: ${POSTGRES_SCHEMA}
     env_file:
-      - .env.local
+      - .env
     networks:
       - app-go-network
 

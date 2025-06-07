@@ -42,6 +42,7 @@ func main() {
 	router.POST("/ping", pingHandler)
 	router.GET("/memory-leak", memoryLeakHandler)
 	router.GET("/", rootHandler)
+	router.GET("/api/internal/metrics", metricsHandler)
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
 		port = "8080"
