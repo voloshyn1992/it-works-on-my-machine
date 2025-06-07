@@ -3,18 +3,17 @@ services:
     image: prom/prometheus
     restart: always
     ports:
-      - '9000:9000'
+      - '9091:9090'
     volumes:
       - ./prometheus:/app/monitoring/prometheus
-      - ./data/prometheus-storage:/app/monitoring/prometheus/data
+      - ./prometheus/data:/app/monitoring/prometheus/data
     command:
       - '--config.file=/app/monitoring/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=720h'
-      - '--storage.tsdb.path=/data'
+      - '--storage.tsdb.path=/app/monitoring/prometheus/data'
       - '--web.enable-admin-api'
-    user: root
     networks:
-      - grafana
+      - monitoring
 
   grafana:
     image: grafana/grafana
@@ -25,9 +24,8 @@ services:
       - prometheus
     env_file:
       - .env
-    user: root
     networks:
-      - grafana
+      - monitoring
 
   node-exporter:
     image: prom/node-exporter
@@ -42,7 +40,7 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
-      - grafana
+      - monitoring
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
@@ -53,7 +51,7 @@ services:
       - /:/rootfs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - grafana
+      - monitoring
 
   alertmanager:
     image: prom/alertmanager
@@ -64,8 +62,33 @@ services:
       - ./alertmanager:/app/monitoring/alertmanager
     command:
       - '--config.file=/app/monitoring/alertmanager/alertmanager.yml'
+    depends_on:
+      - prometheus
     networks:
-      - grafana
+      - monitoring
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+    command:
+      - '-config.file=/etc/loki/loki-config.yml'
+      - '-validation.allow-structured-metadata=false'
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:latest
+    depends_on:
+      - loki
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+    command:
+      - '--config.file=/etc/promtail/promtail-config.yml'
+    networks:
+      - monitoring
 
 networks:
-  grafana:
+  monitoring:

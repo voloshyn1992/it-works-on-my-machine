@@ -5,11 +5,17 @@ DOCKER_COMPOSE=docker compose
 up-all:
 	$(DOCKER_COMPOSE) -f ./backend/docker-compose.yml -f ./frontend/docker-compose.yml -f ./monitoring/docker-compose.yml up -d
 
-front-back:
+up-front-back:
 	$(DOCKER_COMPOSE) -f ./backend/docker-compose.yml -f ./frontend/docker-compose.yml up -d
 
-monitoring:
+down-front-back:
+	$(DOCKER_COMPOSE) -f ./backend/docker-compose.yml -f ./frontend/docker-compose.yml down
+
+up-monitoring:
 	$(DOCKER_COMPOSE) -f ./monitoring/docker-compose.yml up -d
 
-down:
-	$(DOCKER_COMPOSE) down
+down-monitoring:
+	$(DOCKER_COMPOSE) -f ./monitoring/docker-compose.yml down
+
+down all:
+	$(DOCKER_COMPOSE) -f ./backend/docker-compose.yml -f ./frontend/docker-compose.yml -f ./monitoring/docker-compose.yml down

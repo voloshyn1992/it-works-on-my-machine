@@ -3,7 +3,7 @@ global:
   evaluation_interval: 60s
 
 rule_files:
-  - '../alertmanager/alert-rules.yml'
+  - 'alert-rules.yml'
 
 scrape_configs:
 
