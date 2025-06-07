@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 60s
+
+scrape_configs:
+  - job_name: 'app-go'
+    static_configs:
+      - targets:
+        - 'app-go:8080'
+  - job_name: 'app-js'
+    static_configs:
+      - targets:
+        - 'app-js:3000'
