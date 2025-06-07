@@ -1,4 +1,4 @@
 /golang-demo
 .env
-.idea/
+.idea
 vendor
