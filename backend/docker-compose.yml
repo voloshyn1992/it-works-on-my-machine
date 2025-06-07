@@ -1,0 +1,47 @@
+services:
+  app:
+    image: volodymyrbjj/app-go
+    restart: always
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app-go
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.local
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - app-go-network
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app-go-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    restart: always
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      SCHEMA: ${POSTGRES_SCHEMA}
+    env_file:
+      - .env.local
+    networks:
+      - app-go-network
+
+networks:
+  app-go-network:
+

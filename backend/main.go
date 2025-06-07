@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,10 +29,17 @@ func main() {
 	// Server
 	log.Println("Starting server...")
 	router := gin.New()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost", "http://127.0.0.1:3000", "http://127.0.0.1"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	router.GET("/fibonacci", fibonacciHandler)
 	router.POST("/video", videoPostHandler)
 	router.GET("/videos", videosGetHandler)
-	router.GET("/ping", pingHandler)
+	router.POST("/ping", pingHandler)
 	router.GET("/memory-leak", memoryLeakHandler)
 	router.GET("/", rootHandler)
 	port := os.Getenv("PORT")
