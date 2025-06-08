@@ -13,7 +13,7 @@ services:
       - '--storage.tsdb.path=/app/monitoring/prometheus/data'
       - '--web.enable-admin-api'
     networks:
-      - monitoring
+      - app-network
 
   grafana:
     image: grafana/grafana
@@ -25,7 +25,7 @@ services:
     env_file:
       - .env
     networks:
-      - monitoring
+      - app-network
 
   node-exporter:
     image: prom/node-exporter
@@ -40,7 +40,7 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
-      - monitoring
+      - app-network
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
@@ -51,7 +51,7 @@ services:
       - /:/rootfs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - monitoring
+      - app-network
 
   alertmanager:
     image: prom/alertmanager
@@ -65,7 +65,7 @@ services:
     depends_on:
       - prometheus
     networks:
-      - monitoring
+      - app-network
 
   loki:
     image: grafana/loki:latest
@@ -77,7 +77,7 @@ services:
       - '-config.file=/etc/loki/loki-config.yml'
       - '-validation.allow-structured-metadata=false'
     networks:
-      - monitoring
+      - app-network
 
   promtail:
     image: grafana/promtail:latest
@@ -85,10 +85,14 @@ services:
       - loki
     volumes:
       - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /tmp:/tmp
     command:
       - '--config.file=/etc/promtail/promtail-config.yml'
     networks:
-      - monitoring
+      - app-network
 
 networks:
-  monitoring:
+  app-network:
+    name: app-network
+    external: true

@@ -17,5 +17,5 @@ up-monitoring:
 down-monitoring:
 	$(DOCKER_COMPOSE) -f ./monitoring/docker-compose.yml down
 
-down all:
+down-all:
 	$(DOCKER_COMPOSE) -f ./backend/docker-compose.yml -f ./frontend/docker-compose.yml -f ./monitoring/docker-compose.yml down

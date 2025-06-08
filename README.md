@@ -26,8 +26,17 @@
 
 #### Loki 
 Visit http://localhost:9015 and log in (credentials set in .env).
-Go to Configuration → Data Sources and Add data source → Loki.
+Go to Data Sources and Add data source → Loki.
 
 URL: http://loki:3100
+
+Click Save & test.
+
+### Prometheus 
+
+Visit http://localhost:9015 and log in (credentials set in .env).
+Go to Data Sources and Add data source → Prometheus.
+
+URL: http://prometheus:9015
 
 Click Save & test.
