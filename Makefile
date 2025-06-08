@@ -19,3 +19,7 @@ down-monitoring:
 
 down-all:
 	$(DOCKER_COMPOSE) -f ./backend/docker-compose.yml -f ./frontend/docker-compose.yml -f ./monitoring/docker-compose.yml down
+
+create-app-network:
+	docker network create app-network
+
