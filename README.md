@@ -34,9 +34,9 @@ Click Save & test.
 
 ### Prometheus 
 
-Visit http://localhost:9015 and log in (credentials set in .env).
+Visit http://localhost:9090 and log in (credentials set in .env).
 Go to Data Sources and Add data source → Prometheus.
 
-URL: http://prometheus:9015
+URL: http://prometheus:9090
 
 Click Save & test.

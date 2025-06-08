@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"demo/prom"
 	"errors"
 	"fmt"
 	"log"
@@ -35,7 +36,7 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
-	}))
+	})).Use(prom.PrometheusMiddleware())
 	router.GET("/fibonacci", fibonacciHandler)
 	router.POST("/video", videoPostHandler)
 	router.GET("/videos", videosGetHandler)
