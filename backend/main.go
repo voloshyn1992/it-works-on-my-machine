@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"demo/prom"
 	"errors"
 	"fmt"
 	"log"
@@ -35,13 +36,14 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
-	}))
+	})).Use(prom.PrometheusMiddleware())
 	router.GET("/fibonacci", fibonacciHandler)
 	router.POST("/video", videoPostHandler)
 	router.GET("/videos", videosGetHandler)
 	router.POST("/ping", pingHandler)
 	router.GET("/memory-leak", memoryLeakHandler)
 	router.GET("/", rootHandler)
+	router.GET("/api/internal/metrics", metricsHandler)
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
 		port = "8080"

@@ -1,0 +1,98 @@
+services:
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - '9091:9090'
+    volumes:
+      - ./prometheus:/app/monitoring/prometheus
+      - ./prometheus/data:/app/monitoring/prometheus/data
+    command:
+      - '--config.file=/app/monitoring/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=720h'
+      - '--storage.tsdb.path=/app/monitoring/prometheus/data'
+      - '--web.enable-admin-api'
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana
+    restart: always
+    ports:
+      - '9015:3000'
+    depends_on:
+      - prometheus
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+  node-exporter:
+    image: prom/node-exporter
+    restart: always
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - app-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    restart: always
+    ports:
+      - '9090:8080'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - app-network
+
+  alertmanager:
+    image: prom/alertmanager
+    restart: always
+    ports:
+      - '9093:9093'
+    volumes:
+      - ./alertmanager:/app/monitoring/alertmanager
+    command:
+      - '--config.file=/app/monitoring/alertmanager/alertmanager.yml'
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+    command:
+      - '-config.file=/etc/loki/loki-config.yml'
+      - '-validation.allow-structured-metadata=false'
+    networks:
+      - app-network
+
+  promtail:
+    image: grafana/promtail:latest
+    depends_on:
+      - loki
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - '--config.file=/etc/promtail/promtail-config.yml'
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: app-network
+    external: true

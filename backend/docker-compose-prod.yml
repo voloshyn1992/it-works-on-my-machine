@@ -4,14 +4,14 @@ services:
     restart: always
     tty: true
     build:
-      target: dev
+      target: prod
       context: .
       dockerfile: Dockerfile
     container_name: app-go
     ports:
       - "8080:8080"
     env_file:
-      - .env.local
+      - .env
     depends_on:
       - redis
       - postgres
@@ -39,7 +39,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       SCHEMA: ${POSTGRES_SCHEMA}
     env_file:
-      - .env.local
+      - .env
     networks:
       - app-network
 
@@ -48,5 +48,6 @@ networks:
     name: app-network
     driver: bridge
     external: true
+
 
 
