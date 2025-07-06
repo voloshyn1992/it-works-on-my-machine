@@ -7,6 +7,7 @@ data:
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "postgres"
   POSTGRES_USER: "postgres"
+  POSTGRES_SCHEMA: "public"
   REDIS_HOST: "clustercfg.devops-course-cache.2glfyf.eun1.cache.amazonaws.com"
   REDIS_PORT: "6379"
   REACT_APP_BACKEND_URL: "http://backend-service:8080"
