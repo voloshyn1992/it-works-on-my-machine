@@ -58,3 +58,5 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: REDIS_PORT
+      imagePullSecrets:
+        - name: regcred
