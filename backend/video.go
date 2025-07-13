@@ -64,11 +64,13 @@ func getDB(c *gin.Context) *pg.DB {
 		return nil
 	}
 	dbSession := pg.Connect(&pg.Options{
-		Addr:     endpoint + ":" + port,
-		User:     user,
-		Password: pass,
-		Database: name,
+		Addr:      endpoint + ":" + port,
+		User:      user,
+		Password:  pass,
+		Database:  name,
+		TLSConfig: &tls.Config{InsecureSkipVerify: true},
 	})
+
 	return dbSession
 }
 
