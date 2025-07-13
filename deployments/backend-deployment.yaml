@@ -48,11 +48,11 @@ spec:
                 secretKeyRef:
                   name: app-secret
                   key: POSTGRES_PASSWORD
-            - name: REDIS_HOST
+            - name: REDIS_ENDPOINT
               valueFrom:
                 configMapKeyRef:
                   name: app-config
-                  key: REDIS_HOST
+                  key: REDIS_ENDPOINT
             - name: REDIS_PORT
               valueFrom:
                 configMapKeyRef:
