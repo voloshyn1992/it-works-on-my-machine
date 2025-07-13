@@ -9,5 +9,5 @@ data:
   POSTGRES_USER: "postgres"
   POSTGRES_SCHEMA: "public"
   REDIS_HOST: "clustercfg.devops-course-cache.2glfyf.eun1.cache.amazonaws.com:6379"
-  REDIS_PORT: "6380"
+  REDIS_PORT: "6379"
   REACT_APP_BACKEND_URL: "http://localhost:8080"
