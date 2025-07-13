@@ -11,4 +11,4 @@ data:
   POSTGRES_HOST_AUTH_METHOD: "trust"
   REDIS_ENDPOINT: "clustercfg.devops-course-cache.2glfyf.eun1.cache.amazonaws.com"
   REDIS_PORT: "6379"
-  REACT_APP_BACKEND_URL: "http://localhost:80"
+  REACT_APP_BACKEND_URL: ""
