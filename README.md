@@ -40,3 +40,27 @@ Go to Data Sources and Add data source → Prometheus.
 URL: http://prometheus:9090
 
 Click Save & test.
+
+### Docker 
+
+#### Backend
+
+```aiignore
+docker build -t volodymyrbjj/app-go:latest .
+docker push volodymyrbjj/app-go:latest
+```
+
+#### Frontend
+
+```aiignore
+docker build -t volodymyrbjj/app-js:latest .
+docker push volodymyrbjj/app-js:latest
+```
+
+### DB
+
+```aiignore
+psql -h "devops-course-db.crqyww60mezi.eu-north-1.rds.amazonaws.com" \
+     -U "postgres" \
+     -f db_schema.sql
+```

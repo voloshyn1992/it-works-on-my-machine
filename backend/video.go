@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -63,11 +64,13 @@ func getDB(c *gin.Context) *pg.DB {
 		return nil
 	}
 	dbSession := pg.Connect(&pg.Options{
-		Addr:     endpoint + ":" + port,
-		User:     user,
-		Password: pass,
-		Database: name,
+		Addr:      endpoint + ":" + port,
+		User:      user,
+		Password:  pass,
+		Database:  name,
+		TLSConfig: &tls.Config{InsecureSkipVerify: true},
 	})
+
 	return dbSession
 }
 
@@ -203,8 +206,9 @@ func getRedis() (*redis.Client, error) {
 	}
 
 	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", endpoint, port),
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:      fmt.Sprintf("%s:%s", endpoint, port),
+		Password:  "", // no password set
+		DB:        0,  // use default DB
+		TLSConfig: &tls.Config{InsecureSkipVerify: true},
 	}), nil
 }
