@@ -1,0 +1,73 @@
+imagePullSecrets:
+  - name: app-image-secret
+
+backend:
+  image:
+    repository: volodymyrbjj/app-go
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 8080
+    nodePort: 31814
+  resources: {}
+  env:
+    DB_ENDPOINT: "postgres"
+    DB_PORT: "5432"
+    DB_USER: "postgres"
+    DB_NAME: "db"
+    POSTGRES_SCHEMA: "public"
+    REDIS_ENDPOINT: "redis-master"
+    REDIS_PORT: "6379"
+  secret:
+    existingSecret: "webapp-secret"
+    existingSecretKey: "DB_PASS"
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+frontend:
+  image:
+    repository: volodymyrbjj/app-js
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 3000
+    nodePort: 31813
+  env:
+    REACT_APP_BACKEND_URL: "http://app.local/api"
+  extraEnv: []
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+redis:
+  enabled: true
+  fullnameOverride: "redis"
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    service:
+      ports:
+        redis: 6379
+    persistence: { enabled: false }
+
+postgres:
+  enabled: true
+  fullnameOverride: "postgres"
+  auth:
+    username: "postgres"
+    password: "postgres"
+    database: "db"
+  primary:
+    persistence: { enabled: false }
+  architecture: standalone
+
+serviceAccount:
+  create: false

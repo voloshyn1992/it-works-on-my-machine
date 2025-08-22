@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+    {{- include "webapp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: backend
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: backend
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        {{- toYaml .Values.backend.podAnnotations | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ .name }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: app-config, key: DB_ENDPOINT } }
+            - name: DB_PORT
+              valueFrom: { configMapKeyRef: { name: app-config, key: DB_PORT } }
+            - name: DB_NAME
+              valueFrom: { configMapKeyRef: { name: app-config, key: DB_NAME } }
+            - name: DB_USER
+              valueFrom: { configMapKeyRef: { name: app-config, key: DB_USER } }
+            - name: POSTGRES_SCHEMA
+              valueFrom: { configMapKeyRef: { name: app-config, key: POSTGRES_SCHEMA } }
+            - name: DB_PASS
+              {{- if .Values.backend.secret.existingSecret }}
+              valueFrom: { secretKeyRef: { name: {{ .Values.backend.secret.existingSecret | quote }}, key: {{ .Values.backend.secret.existingSecretKey | default "DB_PASS" | quote }} } }
+              {{- else }}
+              valueFrom: { secretKeyRef: { name: webapp-secret, key: DB_PASS } }
+              {{- end }}
+            - name: REDIS_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: app-config, key: REDIS_ENDPOINT } }
+            - name: REDIS_PORT
+              valueFrom: { configMapKeyRef: { name: app-config, key: REDIS_PORT } }
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      nodeSelector:
+        {{- toYaml .Values.backend.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.backend.tolerations | nindent 8 }}
+      affinity:
+        {{- toYaml .Values.backend.affinity | nindent 8 }}
