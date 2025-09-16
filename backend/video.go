@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -68,7 +67,7 @@ func getDB(c *gin.Context) *pg.DB {
 		User:      user,
 		Password:  pass,
 		Database:  name,
-		TLSConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSConfig: nil,
 	})
 
 	return dbSession
@@ -209,6 +208,6 @@ func getRedis() (*redis.Client, error) {
 		Addr:      fmt.Sprintf("%s:%s", endpoint, port),
 		Password:  "", // no password set
 		DB:        0,  // use default DB
-		TLSConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSConfig: nil,
 	}), nil
 }
