@@ -130,7 +130,7 @@ kubectl -n webapp get svc
 
 kubectl -n webapp run redis-cli --rm -it --image=redis:7-alpine --restart=Never -- \
   sh -lc 'redis-cli -h redis-master -p 6379 ping'
-# очікуємо: PONG
+# expected: PONG
 
 kubectl -n webapp run psql --rm -it --image=bitnami/postgresql:17 --restart=Never -- \
   sh -lc 'PGPASSWORD=postgres psql -h postgres -U postgres -d db -c "\l"'
