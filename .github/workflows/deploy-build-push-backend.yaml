@@ -2,17 +2,12 @@
 name: deploy-build-push-backend
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - "backend/**"
-      - ".github/workflows/deploy-build-push-backend.yaml"
-      - "ci/**"
-  workflow_dispatch: {}
-
-concurrency:
-  group: backend-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag"
+        required: false
+        default: ""
 
 jobs:
   deploy-build-push-backend:

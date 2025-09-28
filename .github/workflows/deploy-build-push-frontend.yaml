@@ -2,17 +2,12 @@
 name: deploy-build-push-frontend
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/deploy-build-push-frontend.yaml"
-      - "ci/**"
-  workflow_dispatch: {}
-
-concurrency:
-  group: backend-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag (default sha-<short>)"
+        required: false
+        default: ""
 
 jobs:
   deploy-build-push-frontend:
