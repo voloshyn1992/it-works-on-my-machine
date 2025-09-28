@@ -1,3 +1,4 @@
+---
 name: deploy-build-push-frontend
 
 on:
@@ -9,7 +10,7 @@ on:
         default: ""
 
 jobs:
-  build:
+  deploy-build-push-frontend:
     runs-on: ubuntu-latest
     permissions:
       contents: read
