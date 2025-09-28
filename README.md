@@ -160,6 +160,9 @@ SQL
 10. Install Argocd
 
 ```aiignore
+brew install argocd
+argocd version --client
+
 kubectl create namespace argocd
 kubectl apply -n argocd \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -169,18 +172,13 @@ kubectl -n argocd rollout status deploy/argocd-server
 kubectl -n argocd get secret argocd-initial-admin-secret \
   -o jsonpath="{.data.password}" | base64 -d; echo
   
-  
-brew install argocd
-argocd version --client
-
 # Port-forward, login, and change password
-kubectl -n argocd port-forward svc/argocd-server 8080:443 >/dev/null 2>&1 &
+kubectl -n argocd port-forward svc/argocd-server 8081:443 >/dev/null 2>&1 &
 
-argocd login localhost:8080 --username admin --password <the-password> --insecure
+argocd login localhost:8081 --username admin --password <the-password> --insecure
 argocd account update-password
 # Remove the initial secret per docs
 kubectl -n argocd delete secret argocd-initial-admin-secret
-
 # Kill port-forward process
 pkill -f "kubectl.*port-forward.*argocd-server" || true
 
@@ -194,9 +192,13 @@ kubectl -n argocd create secret docker-registry dockerhub-creds \
  --docker-username=DOCKERHUB_USER \
  --docker-password=DOCKERHUB_PASSWORD
   
-#Apply argocd charts
+#Run from it-works-on-my-machine and apply argocd charts
 kubectl apply -f gitops/app-webapp.yaml
-argocd app wait webapp  
+kubectl -n argocd port-forward svc/argocd-server 8081:443
+argocd app wait webapp
+# Check status
+kubectl -n argocd get pods  
+# If some pods crashed can be the problem with free space (clean volumes, unnecessary images etc.)
 ```
 
 11. First sync via Argo 
@@ -209,8 +211,11 @@ kubectl -n webapp get pods,svc,ingress
 12. Browse to the app
 
 ```aiignore
-http://app.local/
 # backend routes are under http://app.local/api/...
+http://app.local/
+# Argo CD 
+kubectl -n argocd port-forward svc/argocd-server 8081:443
+http://app.local:8081/
 ```
 
 13. Wire image updated
