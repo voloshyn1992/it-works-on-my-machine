@@ -7,8 +7,6 @@ on:
         description: "Image tag (default sha-<short>)"
         required: false
         default: ""
-      paths-ignore:
-        - '.github/**'
 
 jobs:
   build:
