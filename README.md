@@ -69,9 +69,10 @@ psql -h "devops-course-db.crqyww60mezi.eu-north-1.rds.amazonaws.com" \
 Step-by-step instruction
 
 1. Create cluster
+
 ```aiignore
-kind create cluster --name dev --config kind-ingress.yaml
-kubectl cluster-info - checks cluster state
+kind create cluster --name dev --config charts/cluster-ingress.yaml
+kubectl cluster-info --context kind-dev - checks cluster state
 ```
 2. Apply ingress 
 
@@ -90,7 +91,7 @@ kubectl create namespace webapp
 
 ```aiignore
 kubectl -n webapp create secret generic webapp-secret \
-  --from-literal=DB_PASS=pass
+  --from-literal=DB_PASS=db_password
   
 kubectl -n webapp create secret docker-registry app-image-secret \
   --docker-server=https://index.docker.io/v1/ \
@@ -107,6 +108,7 @@ echo "127.0.0.1 app.local" | sudo tee -a /etc/hosts
 6. Update helm dependencies and install charts
 
 ```aiignore
+# Run to `/charts/webapp` folder and run
 helm dep up
 helm upgrade --install webapp . -n webapp -f values.yaml
 
@@ -119,7 +121,9 @@ kubectl -n webapp get pods,svc
 
 ```aiignore
 kubectl -n ingress-nginx get pods
-kubectl -n webapp get ingress webapp
+kubectl -n webapp get ingress
+kubectl -n webapp describe ingress webapp-frontend
+kubectl -n webapp describe ingress webapp-backend-rewrite
 ```
 
 8. Debug
@@ -137,7 +141,102 @@ kubectl -n webapp run psql --rm -it --image=bitnami/postgresql:17 --restart=Neve
 ```
 
 9. Create DB
+```aiignore
+kubectl -n webapp run psql --rm -it --image=postgres:16 --restart=Never -- \
+  bash -lc '
+export PGPASSWORD=postgres
+psql -h postgres -U postgres -d postgres <<'"'"'SQL'"'"'
+SELECT '\''CREATE DATABASE db'\'' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\''db'\'') \gexec
+\c db
+CREATE TABLE IF NOT EXISTS public.videos (
+  id VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL
+);
+SQL
+'
+
+```
+
+10. Install Argocd
 
 ```aiignore
+kubectl create namespace argocd
+kubectl apply -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl -n argocd rollout status deploy/argocd-server
+
+# Get initial password
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
+  
+  
+brew install argocd
+argocd version --client
+
+# Port-forward, login, and change password
+kubectl -n argocd port-forward svc/argocd-server 8080:443 >/dev/null 2>&1 &
+
+argocd login localhost:8080 --username admin --password <the-password> --insecure
+argocd account update-password
+# Remove the initial secret per docs
+kubectl -n argocd delete secret argocd-initial-admin-secret
+
+# Kill port-forward process
+pkill -f "kubectl.*port-forward.*argocd-server" || true
+
+# Install argocd image updated
+kubectl apply -n argocd \
+  -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
+  
+# Create secret for argocd namespace for dockerhub
+kubectl -n argocd create secret docker-registry dockerhub-creds \
+ --docker-server=index.docker.io \
+ --docker-username=DOCKERHUB_USER \
+ --docker-password=DOCKERHUB_PASSWORD
+  
+#Apply argocd charts
+kubectl apply -f gitops/app-webapp.yaml
+argocd app wait webapp  
+```
+
+11. First sync via Argo 
+
+```aiignore
+argocd app get webapp
+kubectl -n webapp get pods,svc,ingress
+```
+
+12. Browse to the app
+
+```aiignore
+http://app.local/
+# backend routes are under http://app.local/api/...
+```
+
+13. Wire image updated
+
+```aiignore
+kubectl -n argocd logs -f deploy/argocd-image-updater
+
+#We should see it detect new tags/digests for:
+
+docker.io/volodymyrbjj/app-go
+docker.io/volodymyrbjj/app-js
+```
+14. Manual test CI
+
+```aiignore
+kubectl -n argocd logs -f deploy/argocd-image-updater | sed -n 's/.*webapp.*/&/p'
+
+# Watch Argo CD reconcile and the rollout
+
+argocd app history webapp
+kubectl -n webapp rollout status deploy/backend
+kubectl -n webapp rollout status deploy/frontend
+
+# Confirm the new images are in use
+
+kubectl -n webapp get deploy backend -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
+kubectl -n webapp get deploy frontend -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
 
 ```
