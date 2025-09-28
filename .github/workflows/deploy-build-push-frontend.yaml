@@ -18,16 +18,22 @@ jobs:
       packages: write
     env:
       IMAGE: docker.io/volodymyrbjj/app-js
-      TAG: ${{ github.event.inputs.tag != '' && github.event.inputs.tag || format('sha-{0}', github.sha[0:7]) }}
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
 
-      - name: Derive short SHA
-        id: vars
-        run: echo "SHA7=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      # Derive TAG: use input if provided, else sha-<7>
+      - name: Compute TAG
+        id: meta
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "TAG=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
