@@ -1,3 +1,7 @@
+global:
+  security:
+    allowInsecureImages: true
+
 imagePullSecrets:
   - name: app-image-secret
 
@@ -47,6 +51,9 @@ frontend:
   affinity: {}
 
 redis:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/redis
   enabled: true
   fullnameOverride: "redis"
   architecture: standalone
@@ -59,6 +66,9 @@ redis:
     persistence: { enabled: false }
 
 postgres:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
   enabled: true
   fullnameOverride: "postgres"
   auth:
