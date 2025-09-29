@@ -154,7 +154,6 @@ CREATE TABLE IF NOT EXISTS public.videos (
 );
 SQL
 '
-
 ```
 
 10. Install Argocd
@@ -181,6 +180,13 @@ argocd account update-password
 kubectl -n argocd delete secret argocd-initial-admin-secret
 # Kill port-forward process
 pkill -f "kubectl.*port-forward.*argocd-server" || true
+
+# Let argo cd and updater write to the repo
+argocd repo add https://github.com/voloshyn1992/it-works-on-my-machine.git \
+  --username <your_github_user> \
+  --password <your_github_pat> \
+  --name my-repo
+
 
 # Install argocd image updated
 kubectl apply -n argocd \
@@ -218,30 +224,38 @@ kubectl -n argocd port-forward svc/argocd-server 8081:443
 http://app.local:8081/
 ```
 
-13. Wire image updated
-
+14. Run actions locally
 ```aiignore
-kubectl -n argocd logs -f deploy/argocd-image-updater
 
-#We should see it detect new tags/digests for:
+# Install
 
-docker.io/volodymyrbjj/app-go
-docker.io/volodymyrbjj/app-js
+brew install act
+
+# Create a .secrets file
+DOCKERHUB_USERNAME=your_dockerhub_user
+DOCKERHUB_TOKEN=your_dockerhub_token
+
+# Run the workflow job locally from it-works-on-my-machine
+# backend
+act workflow_dispatch \
+  -W .github/workflows/deploy-build-push-backend.yaml \
+  --secret-file .secrets \
+  -P ubuntu-latest=catthehacker/ubuntu:act-latest
+
+#frontend
+act workflow_dispatch \
+  -W .github/workflows/deploy-build-push-frontend.yaml \
+  --secret-file .secrets \
+  -P ubuntu-latest=catthehacker/ubuntu:act-latest
 ```
-14. Manual test CI
+
+15. Verify it works
 
 ```aiignore
-kubectl -n argocd logs -f deploy/argocd-image-updater | sed -n 's/.*webapp.*/&/p'
-
-# Watch Argo CD reconcile and the rollout
-
-argocd app history webapp
+kubectl -n argocd logs -f deploy/argocd-image-updater | egrep 'webapp|updated|app-go|app-js'
 kubectl -n webapp rollout status deploy/backend
 kubectl -n webapp rollout status deploy/frontend
-
-# Confirm the new images are in use
-
-kubectl -n webapp get deploy backend -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
+kubectl -n webapp get deploy backend  -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
 kubectl -n webapp get deploy frontend -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
-
 ```
+
