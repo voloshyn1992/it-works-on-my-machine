@@ -15,12 +15,13 @@ metadata:
     argocd-image-updater.argoproj.io/frontend.helm.image-tag: frontend.image.tag
 
     argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/write-back-target: helm
     argocd-image-updater.argoproj.io/git-branch: main
 
     argocd-image-updater.argoproj.io/backend.update-strategy: latest
     argocd-image-updater.argoproj.io/frontend.update-strategy: latest
-    argocd-image-updater.argoproj.io/backend.allow-tags:  ^sha-.*$
-    argocd-image-updater.argoproj.io/frontend.allow-tags: ^sha-.*$
+    argocd-image-updater.argoproj.io/backend.allow-tags: "^sha-.*$"
+    argocd-image-updater.argoproj.io/frontend.allow-tags: "^sha-.*$"
     argocd-image-updater.argoproj.io/backend.pull-secret: pullsecret:argocd/dockerhub-creds
     argocd-image-updater.argoproj.io/frontend.pull-secret: pullsecret:argocd/dockerhub-creds
 spec:
