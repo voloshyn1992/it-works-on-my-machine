@@ -27,7 +27,7 @@ jobs:
       - name: Test
         run: |
           cd backend
-          go test ./...
+          go test -race -v
 
       # Derive TAG: use input if provided, else sha-<7>
       - name: Compute TAG
