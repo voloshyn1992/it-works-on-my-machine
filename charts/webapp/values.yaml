@@ -3,8 +3,8 @@ imagePullSecrets:
 
 backend:
   image:
-    repository: volodymyrbjj/app-go
-    tag: "latest"
+    repository: docker.io/volodymyrbjj/app-go
+    tag: "sha-0000000"
     pullPolicy: IfNotPresent
   replicas: 1
   service:
@@ -30,8 +30,8 @@ backend:
 
 frontend:
   image:
-    repository: volodymyrbjj/app-js
-    tag: "latest"
+    repository: docker.io/volodymyrbjj/app-js
+    tag: "sha-0000000"
     pullPolicy: IfNotPresent
   replicas: 1
   service:
