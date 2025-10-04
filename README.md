@@ -194,9 +194,9 @@ kubectl apply -n argocd \
   
 # Create secret for argocd namespace for dockerhub
 kubectl -n argocd create secret docker-registry dockerhub-creds \
- --docker-server=index.docker.io \
- --docker-username=DOCKERHUB_USER \
- --docker-password=DOCKERHUB_PASSWORD
+  --docker-server=https://registry-1.docker.io \
+  --docker-username="$DOCKERHUB_USER" \
+  --docker-password="$DOCKERHUB_TOKEN"
   
 #Run from it-works-on-my-machine and apply argocd charts
 kubectl apply -f gitops/app-webapp.yaml
