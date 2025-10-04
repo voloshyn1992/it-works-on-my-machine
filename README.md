@@ -134,7 +134,7 @@ kubectl -n webapp get svc
 
 kubectl -n webapp run redis-cli --rm -it --image=redis:7-alpine --restart=Never -- \
   sh -lc 'redis-cli -h redis-master -p 6379 ping'
-# expected: PONG
+# expect: PONG
 
 kubectl -n webapp run psql --rm -it --image=bitnami/postgresql:17 --restart=Never -- \
   sh -lc 'PGPASSWORD=postgres psql -h postgres -U postgres -d db -c "\l"'
@@ -142,7 +142,7 @@ kubectl -n webapp run psql --rm -it --image=bitnami/postgresql:17 --restart=Neve
 
 9. Create DB
 ```aiignore
-kubectl -n webapp run psql --rm -it --image=postgres:16 --restart=Never -- \
+kubectl -n webapp run psql --rm -it --image=postgres:17 --restart=Never -- \
   bash -lc '
 export PGPASSWORD=postgres
 psql -h postgres -U postgres -d postgres <<'"'"'SQL'"'"'
@@ -186,7 +186,6 @@ argocd repo add https://github.com/voloshyn1992/it-works-on-my-machine.git \
   --username <your_github_user> \
   --password <your_github_pat> \
   --name my-repo
-
 
 # Install argocd image updated
 kubectl apply -n argocd \
