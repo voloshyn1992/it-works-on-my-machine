@@ -8,7 +8,7 @@ imagePullSecrets:
 backend:
   image:
     repository: docker.io/volodymyrbjj/app-go
-    tag: "latest"
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   replicas: 1
   service:
@@ -35,7 +35,7 @@ backend:
 frontend:
   image:
     repository: docker.io/volodymyrbjj/app-js
-    tag: "latest"
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   replicas: 1
   service:
