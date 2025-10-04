@@ -177,8 +177,10 @@ kubectl -n argocd port-forward svc/argocd-server 8081:443 >/dev/null 2>&1 &
 
 argocd login localhost:8081 --username admin --password <the-password> --insecure
 argocd account update-password
+
 # Remove the initial secret per docs
 kubectl -n argocd delete secret argocd-initial-admin-secret
+
 # Kill port-forward process
 pkill -f "kubectl.*port-forward.*argocd-server" || true
 
@@ -202,8 +204,10 @@ kubectl -n argocd create secret docker-registry dockerhub-creds \
 kubectl apply -f gitops/app-webapp.yaml
 kubectl -n argocd port-forward svc/argocd-server 8081:443
 argocd app wait webapp
+
 # Check status
 kubectl -n argocd get pods  
+
 # If some pods crashed can be the problem with free space (clean volumes, unnecessary images etc.)
 ```
 
@@ -219,16 +223,16 @@ kubectl -n webapp get pods,svc,ingress
 ```aiignore
 # backend routes are under http://app.local/api/...
 http://app.local/
+
 # Argo CD 
 kubectl -n argocd port-forward svc/argocd-server 8081:443
 http://app.local:8081/
 ```
 
 14. Run actions locally
+
 ```aiignore
-
 # Install
-
 brew install act
 
 # Create a .secrets file

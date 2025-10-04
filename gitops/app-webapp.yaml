@@ -8,7 +8,6 @@ metadata:
       backend=docker.io/volodymyrbjj/app-go:~1.0,
       frontend=docker.io/volodymyrbjj/app-js:~1.0
 
-    # Map each alias to Helm values (repo + tag fields inside your chart)
     argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
     argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
     argocd-image-updater.argoproj.io/frontend.helm.image-name: frontend.image.repository
