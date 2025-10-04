@@ -141,6 +141,7 @@ kubectl -n webapp run psql --rm -it --image=bitnami/postgresql:17 --restart=Neve
 ```
 
 9. Create DB
+
 ```aiignore
 kubectl -n webapp run psql --rm -it --image=postgres:17 --restart=Never -- \
   bash -lc '

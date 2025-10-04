@@ -4,26 +4,19 @@ metadata:
   name: webapp
   namespace: argocd
   annotations:
-    # images to track (aliases: backend, frontend)
     argocd-image-updater.argoproj.io/image-list: |
-      backend=docker.io/volodymyrbjj/app-go,frontend=docker.io/volodymyrbjj/app-js
+      backend=docker.io/volodymyrbjj/app-go:~1.0,
+      frontend=docker.io/volodymyrbjj/app-js:~1.0
 
-    # values that hold image name/tag for each alias
+    # Map each alias to Helm values (repo + tag fields inside your chart)
     argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
     argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
     argocd-image-updater.argoproj.io/frontend.helm.image-name: frontend.image.repository
     argocd-image-updater.argoproj.io/frontend.helm.image-tag: frontend.image.tag
-
-    argocd-image-updater.argoproj.io/write-back-method: git
-    argocd-image-updater.argoproj.io/write-back-target: helm
-    argocd-image-updater.argoproj.io/git-branch: main
-
-    argocd-image-updater.argoproj.io/backend.update-strategy: latest
-    argocd-image-updater.argoproj.io/frontend.update-strategy: latest
-    argocd-image-updater.argoproj.io/backend.allow-tags: "^sha-.*$"
-    argocd-image-updater.argoproj.io/frontend.allow-tags: "^sha-.*$"
-    argocd-image-updater.argoproj.io/backend.pull-secret: pullsecret:argocd/dockerhub-creds
-    argocd-image-updater.argoproj.io/frontend.pull-secret: pullsecret:argocd/dockerhub-creds
+    argocd-image-updater.argoproj.io/write-back-method: argocd
+    argocd-image-updater.argoproj.io/backend.update-strategy: semver
+    argocd-image-updater.argoproj.io/frontend.update-strategy: semver
+    argocd-image-updater.argoproj.io/pull-secret: pullsecret:argocd/dockerhub-creds
 spec:
   project: default
   source:
