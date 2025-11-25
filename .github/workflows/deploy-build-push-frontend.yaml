@@ -1,0 +1,82 @@
+name: deploy-build-push-frontend
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-build-push-frontend.yaml"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Override image tag (e.g., 1.0.123). Defaults to 1.0.<run_number>"
+        required: false
+        default: ""
+
+jobs:
+  deploy-build-push-frontend:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: frontend-publish-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+    env:
+      IMAGE: docker.io/volodymyrbjj/app-js
+      BASE_VERSION: "1.0"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Frontend tests
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test --if-present
+
+      - name: Compute tags (semver + sha)
+        id: meta
+        shell: bash
+        run: |
+          SHA_TAG="sha-${GITHUB_SHA::7}"
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            SEMVER_TAG="${{ github.event.inputs.tag }}"
+          else
+            SEMVER_TAG="${BASE_VERSION}.${GITHUB_RUN_NUMBER}"
+          fi
+          {
+            echo "SEMVER_TAG=${SEMVER_TAG}"
+            echo "SHA_TAG=${SHA_TAG}"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.SEMVER_TAG }}
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.SHA_TAG }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Summary
+        run: |
+          echo "Published:"
+          echo " - $IMAGE:${{ steps.meta.outputs.SEMVER_TAG }}"
+          echo " - $IMAGE:${{ steps.meta.outputs.SHA_TAG }}"
+          echo " - $IMAGE:latest"

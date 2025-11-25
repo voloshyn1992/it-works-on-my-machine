@@ -85,7 +85,7 @@ func videosGetHandler(ctx *gin.Context) {
 	videoCacheKay := "videos"
 	val, err := client.Get(ctx, videoCacheKay).Result()
 	if err == redis.Nil {
-		slog.Warn("key %s does not exist", videoCacheKay)
+		slog.Warn("key does not exist", "key", videoCacheKay)
 	} else if err != nil {
 		slog.Error("Error fetching from Redis", "error", err)
 		httpErrorInternalServerError(err, ctx)
